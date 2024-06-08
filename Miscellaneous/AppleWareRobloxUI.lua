@@ -5,26 +5,49 @@ screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
 -- Create Frame
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 300, 0, 200)
-frame.Position = UDim2.new(0.5, -150, 0.5, -100)
+frame.Size = UDim2.new(0, 400, 0, 300)
+frame.Position = UDim2.new(0.5, -200, 0.5, -150)
 frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 frame.BorderSizePixel = 0
 frame.Parent = screenGui
 
+-- Create ScrollingFrame for TextBox
+local scrollingFrame = Instance.new("ScrollingFrame")
+scrollingFrame.Size = UDim2.new(1, -10, 0.8, -10)
+scrollingFrame.Position = UDim2.new(0, 5, 0, 5)
+scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+scrollingFrame.ScrollBarThickness = 5
+scrollingFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+scrollingFrame.BorderSizePixel = 0
+scrollingFrame.Parent = frame
+
 -- Create TextBox
 local textBox = Instance.new("TextBox")
-textBox.Size = UDim2.new(1, -10, 0.7, -10)
+textBox.Size = UDim2.new(1, -10, 1, -10)
 textBox.Position = UDim2.new(0, 5, 0, 5)
-textBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+textBox.BackgroundTransparency = 1
 textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 textBox.Text = ""
 textBox.ClearTextOnFocus = false
-textBox.Parent = frame
+textBox.MultiLine = true
+textBox.TextXAlignment = Enum.TextXAlignment.Left
+textBox.TextYAlignment = Enum.TextYAlignment.Top
+textBox.TextWrapped = true -- Ensures text wraps within the TextBox
+textBox.Parent = scrollingFrame
+
+-- Adjust CanvasSize based on text content
+local function updateCanvasSize()
+    local textHeight = textBox.TextBounds.Y
+    scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, textHeight + 10)
+end
+
+textBox:GetPropertyChangedSignal("Text"):Connect(updateCanvasSize)
+updateCanvasSize()
 
 -- Create Execute Button
 local executeButton = Instance.new("TextButton")
-executeButton.Size = UDim2.new(0.5, -7.5, 0.2, -5)
-executeButton.Position = UDim2.new(0, 5, 0.75, 0)
+executeButton.Size = UDim2.new(0.5, -7.5, 0.15, -5)
+executeButton.Position = UDim2.new(0, 5, 0.85, 0)
 executeButton.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
 executeButton.TextColor3 = Color3.fromRGB(0, 0, 0)
 executeButton.Text = "Execute"
@@ -32,12 +55,39 @@ executeButton.Parent = frame
 
 -- Create Clear Button
 local clearButton = Instance.new("TextButton")
-clearButton.Size = UDim2.new(0.5, -7.5, 0.2, -5)
-clearButton.Position = UDim2.new(0.5, 2.5, 0.75, 0)
+clearButton.Size = UDim2.new(0.5, -7.5, 0.15, -5)
+clearButton.Position = UDim2.new(0.5, 2.5, 0.85, 0)
 clearButton.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
 clearButton.TextColor3 = Color3.fromRGB(0, 0, 0)
 clearButton.Text = "Clear"
 clearButton.Parent = frame
+
+-- Create Line Numbers
+local lineNumbers = Instance.new("TextLabel")
+lineNumbers.Size = UDim2.new(0, 30, 1, -10)
+lineNumbers.Position = UDim2.new(0, -35, 0, 5)
+lineNumbers.BackgroundTransparency = 1
+lineNumbers.TextColor3 = Color3.fromRGB(255, 255, 255)
+lineNumbers.Text = ""
+lineNumbers.TextXAlignment = Enum.TextXAlignment.Right
+lineNumbers.TextYAlignment = Enum.TextYAlignment.Top
+lineNumbers.Font = Enum.Font.Code
+lineNumbers.TextSize = 14
+lineNumbers.Parent = scrollingFrame
+
+-- Update Line Numbers
+local function updateLineNumbers()
+    local lines = textBox.Text:split("\n")
+    local numbers = ""
+    for i = 1, #lines do
+        numbers = numbers .. i .. "\n"
+    end
+    lineNumbers.Text = numbers
+    lineNumbers.Size = UDim2.new(0, 30, 0, textBox.TextBounds.Y + 10)
+end
+
+textBox:GetPropertyChangedSignal("Text"):Connect(updateLineNumbers)
+updateLineNumbers()
 
 -- Dragging functionality
 local dragging
@@ -78,8 +128,13 @@ end)
 
 -- Button functionalities
 executeButton.MouseButton1Click:Connect(function()
-    -- Add your execute functionality here
-    print("Executing: " .. textBox.Text)
+    local scriptText = textBox.Text
+    local func, err = loadstring(scriptText)
+    if func then
+        pcall(func)
+    else
+        warn("Error in script: " .. err)
+    end
 end)
 
 clearButton.MouseButton1Click:Connect(function()
