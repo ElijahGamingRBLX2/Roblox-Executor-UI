@@ -12,20 +12,40 @@ frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 frame.BorderSizePixel = 0
 frame.Parent = executorGui
 
--- Create ScrollingFrame for TextBox
+-- Create ScrollingFrame for TextBox and Line Numbers
 local scrollingFrame = Instance.new("ScrollingFrame")
-scrollingFrame.Size = UDim2.new(1, -50, 0.8, -10)
-scrollingFrame.Position = UDim2.new(0, 45, 0, 5)
+scrollingFrame.Size = UDim2.new(1, -10, 0.8, -10)
+scrollingFrame.Position = UDim2.new(0, 5, 0, 5)
 scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 scrollingFrame.ScrollBarThickness = 5
 scrollingFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 scrollingFrame.BorderSizePixel = 0
 scrollingFrame.Parent = frame
 
+-- Create a Container for TextBox and Line Numbers
+local container = Instance.new("Frame")
+container.Size = UDim2.new(1, -10, 0, 0)
+container.Position = UDim2.new(0, 0, 0, 0)
+container.BackgroundTransparency = 1
+container.Parent = scrollingFrame
+
+-- Create Line Numbers
+local lineNumbers = Instance.new("TextLabel")
+lineNumbers.Size = UDim2.new(0, 40, 1, 0)
+lineNumbers.Position = UDim2.new(0, 0, 0, 0)
+lineNumbers.BackgroundTransparency = 1
+lineNumbers.TextColor3 = Color3.fromRGB(255, 255, 255)
+lineNumbers.Text = "1"
+lineNumbers.TextXAlignment = Enum.TextXAlignment.Right
+lineNumbers.TextYAlignment = Enum.TextYAlignment.Top
+lineNumbers.Font = Enum.Font.Code
+lineNumbers.TextSize = 14
+lineNumbers.Parent = container
+
 -- Create TextBox for Executor
 local textBox = Instance.new("TextBox")
-textBox.Size = UDim2.new(1, -10, 1, -10)
-textBox.Position = UDim2.new(0, 5, 0, 5)
+textBox.Size = UDim2.new(1, -45, 1, 0)
+textBox.Position = UDim2.new(0, 45, 0, 0)
 textBox.BackgroundTransparency = 1
 textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 textBox.Text = ""
@@ -34,24 +54,12 @@ textBox.MultiLine = true
 textBox.TextXAlignment = Enum.TextXAlignment.Left
 textBox.TextYAlignment = Enum.TextYAlignment.Top
 textBox.TextWrapped = true  -- Ensure text wraps within the TextBox
-textBox.Parent = scrollingFrame
-
--- Create Line Numbers
-local lineNumbers = Instance.new("TextLabel")
-lineNumbers.Size = UDim2.new(0, 40, 1, -10)
-lineNumbers.Position = UDim2.new(0, 5, 0, 5)
-lineNumbers.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-lineNumbers.TextColor3 = Color3.fromRGB(255, 255, 255)
-lineNumbers.Text = "1"
-lineNumbers.TextXAlignment = Enum.TextXAlignment.Right
-lineNumbers.TextYAlignment = Enum.TextYAlignment.Top
-lineNumbers.Font = Enum.Font.Code
-lineNumbers.TextSize = 14
-lineNumbers.Parent = frame
+textBox.Parent = container
 
 -- Adjust CanvasSize based on text content
 local function updateCanvasSize()
     local textHeight = textBox.TextBounds.Y
+    container.Size = UDim2.new(1, -10, 0, textHeight + 10)
     scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, textHeight + 10)
 end
 
