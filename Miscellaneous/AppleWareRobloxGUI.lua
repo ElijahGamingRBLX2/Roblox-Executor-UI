@@ -159,4 +159,5 @@ end)
 -- Toggle button functionality
 toggleButton.MouseButton1Click:Connect(function()
     executorGui.Enabled = not executorGui.Enabled
+    print("Toggled Executor GUI:", executorGui.Enabled)
 end)
