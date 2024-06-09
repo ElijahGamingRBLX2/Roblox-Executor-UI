@@ -1,22 +1,8 @@
--- Create ScreenGui for Toggle Button
-local toggleGui = Instance.new("ScreenGui")
-toggleGui.Name = "ToggleGUI"
-toggleGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-
--- Create Toggle Button
-local toggleButton = Instance.new("TextButton")
-toggleButton.Size = UDim2.new(0, 150, 0, 50)
-toggleButton.Position = UDim2.new(0, 10, 0, 10)
-toggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 200)
-toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-toggleButton.Text = "Toggle Executor"
-toggleButton.Parent = toggleGui
-
 -- Create ScreenGui for Executor
 local executorGui = Instance.new("ScreenGui")
 executorGui.Name = "ExecutorGUI"
 executorGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-executorGui.Enabled = false  -- Initially hidden
+executorGui.Enabled = true  -- Executor GUI is now always visible
 
 -- Create Frame for Executor
 local frame = Instance.new("Frame")
@@ -28,8 +14,8 @@ frame.Parent = executorGui
 
 -- Create ScrollingFrame for TextBox
 local scrollingFrame = Instance.new("ScrollingFrame")
-scrollingFrame.Size = UDim2.new(1, -10, 0.8, -10)
-scrollingFrame.Position = UDim2.new(0, 5, 0, 5)
+scrollingFrame.Size = UDim2.new(1, -50, 0.8, -10)
+scrollingFrame.Position = UDim2.new(0, 45, 0, 5)
 scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 scrollingFrame.ScrollBarThickness = 5
 scrollingFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
@@ -50,14 +36,42 @@ textBox.TextYAlignment = Enum.TextYAlignment.Top
 textBox.TextWrapped = true  -- Ensure text wraps within the TextBox
 textBox.Parent = scrollingFrame
 
+-- Create Line Numbers
+local lineNumbers = Instance.new("TextLabel")
+lineNumbers.Size = UDim2.new(0, 40, 1, -10)
+lineNumbers.Position = UDim2.new(0, 5, 0, 5)
+lineNumbers.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+lineNumbers.TextColor3 = Color3.fromRGB(255, 255, 255)
+lineNumbers.Text = "1"
+lineNumbers.TextXAlignment = Enum.TextXAlignment.Right
+lineNumbers.TextYAlignment = Enum.TextYAlignment.Top
+lineNumbers.Font = Enum.Font.Code
+lineNumbers.TextSize = 14
+lineNumbers.Parent = frame
+
 -- Adjust CanvasSize based on text content
 local function updateCanvasSize()
     local textHeight = textBox.TextBounds.Y
     scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, textHeight + 10)
 end
 
-textBox:GetPropertyChangedSignal("Text"):Connect(updateCanvasSize)
+-- Update Line Numbers
+local function updateLineNumbers()
+    local lines = textBox.Text:split("\n")
+    local numbers = ""
+    for i = 1, #lines do
+        numbers = numbers .. i .. "\n"
+    end
+    lineNumbers.Text = numbers
+end
+
+textBox:GetPropertyChangedSignal("Text"):Connect(function()
+    updateCanvasSize()
+    updateLineNumbers()
+end)
+
 updateCanvasSize()
+updateLineNumbers()
 
 -- Create Execute Button
 local executeButton = Instance.new("TextButton")
@@ -76,33 +90,6 @@ clearButton.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
 clearButton.TextColor3 = Color3.fromRGB(0, 0, 0)
 clearButton.Text = "Clear"
 clearButton.Parent = frame
-
--- Create Line Numbers
-local lineNumbers = Instance.new("TextLabel")
-lineNumbers.Size = UDim2.new(0, 30, 1, -10)
-lineNumbers.Position = UDim2.new(0, -35, 0, 5)
-lineNumbers.BackgroundTransparency = 1
-lineNumbers.TextColor3 = Color3.fromRGB(255, 255, 255)
-lineNumbers.Text = ""
-lineNumbers.TextXAlignment = Enum.TextXAlignment.Right
-lineNumbers.TextYAlignment = Enum.TextYAlignment.Top
-lineNumbers.Font = Enum.Font.Code
-lineNumbers.TextSize = 14
-lineNumbers.Parent = scrollingFrame
-
--- Update Line Numbers
-local function updateLineNumbers()
-    local lines = textBox.Text:split("\n")
-    local numbers = ""
-    for i = 1, #lines do
-        numbers = numbers .. i .. "\n"
-    end
-    lineNumbers.Text = numbers
-    lineNumbers.Size = UDim2.new(0, 30, 0, textBox.TextBounds.Y + 10)
-end
-
-textBox:GetPropertyChangedSignal("Text"):Connect(updateLineNumbers)
-updateLineNumbers()
 
 -- Dragging functionality
 local dragging
@@ -154,10 +141,4 @@ end)
 
 clearButton.MouseButton1Click:Connect(function()
     textBox.Text = ""
-end)
-
--- Toggle button functionality
-toggleButton.MouseButton1Click:Connect(function()
-    executorGui.Enabled = not executorGui.Enabled
-    print("Toggled Executor GUI:", executorGui.Enabled)
 end)
