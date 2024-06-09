@@ -150,3 +150,12 @@ end)
 clearButton.MouseButton1Click:Connect(function()
     textBox.Text = ""
 end)
+
+-- Ensure the TextBox can receive focus
+textBox.FocusLost:Connect(function()
+    textBox:CaptureFocus()
+end)
+
+textBox.Focused:Connect(function()
+    textBox:CaptureFocus()
+end)
